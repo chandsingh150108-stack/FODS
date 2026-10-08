@@ -252,5 +252,23 @@ class PackingEngine:
                 if verbose:
                     print(f"[NOT PACKED] {item.name} -> No safe position found.")
 
+        # Post-packing Graph Analytics (DFS stability DAG + BFS spatial accessibility)
+        if verbose:
+            print("\n" + "-" * 70)
+            print("GRAPH-THEORY VERIFICATION (BFS & DFS TRAVERSALS)")
+            print("-" * 70)
+            for container in containers:
+                if container.packed_items:
+                    stability = container.analyze_structural_stability_dfs()
+                    accessibility = container.analyze_logistics_accessibility_bfs()
+                    print(
+                        f"Container {container.id}:"
+                        f"\n  * DFS Physical DAG Integrity: {'PASS (No circular dependencies)' if stability['is_physically_stable_dag'] else 'FAIL'}"
+                        f"\n  * DFS Topological Unstacking Order: {stability['unstacking_sequence']}"
+                        f"\n  * BFS Connected Cargo Clusters: {accessibility['cargo_clusters']}"
+                        f"\n  * BFS Extraction Distance Layers: {accessibility['accessibility_layers']}"
+                    )
+            print("-" * 70 + "\n")
+
         return items
 

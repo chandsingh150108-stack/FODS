@@ -10,9 +10,19 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
-from dsa import custom_any, custom_max, custom_min
+from dsa import (
+    Graph,
+    bfs_accessibility_hops,
+    bfs_connected_components,
+    custom_any,
+    custom_max,
+    custom_min,
+    dfs_cumulative_subtree_load,
+    dfs_has_cycle,
+    dfs_topological_sort,
+)
 
 
 def approximately_equal(a: float, b: float, tolerance: float = 0.001) -> bool:
@@ -362,4 +372,146 @@ class Container:
         self.used_weight = 0.0
         self.used_volume = 0.0
         self.packed_items.clear()
+
+    # -------------------------------------------------------------
+    # Advanced Graph Modeling & BFS / DFS Analytics
+    # -------------------------------------------------------------
+    def build_support_graph(self) -> Graph:
+        """Construct a Directed Stacking Graph of physical support dependencies.
+
+        An edge (u -> v) indicates that base item u physically supports top item v.
+        """
+        graph = Graph(directed=True)
+        for item in self.packed_items:
+            graph.add_node(item.id)
+
+        for top_item in self.packed_items:
+            for base_item in self.packed_items:
+                if top_item.id == base_item.id:
+                    continue
+                # Check vertical contact
+                base_top = base_item.z + base_item.packed_height
+                if approximately_equal(base_top, top_item.z):
+                    # Horizontal contact overlap in XY plane
+                    ox = custom_max(
+                        0.0,
+                        custom_min(
+                            top_item.x + top_item.packed_length,
+                            base_item.x + base_item.packed_length,
+                        )
+                        - custom_max(top_item.x, base_item.x),
+                    )
+                    oy = custom_max(
+                        0.0,
+                        custom_min(
+                            top_item.y + top_item.packed_width,
+                            base_item.y + base_item.packed_width,
+                        )
+                        - custom_max(top_item.y, base_item.y),
+                    )
+                    if (ox * oy) > 0.001:
+                        graph.add_edge(base_item.id, top_item.id)
+
+        return graph
+
+    def build_spatial_adjacency_graph(self) -> Graph:
+        """Construct an Undirected Graph of 3D spatial face-contact adjacency."""
+        graph = Graph(directed=False)
+        for item in self.packed_items:
+            graph.add_node(item.id)
+
+        count = len(self.packed_items)
+        for i in range(count):
+            for j in range(i + 1, count):
+                it1 = self.packed_items[i]
+                it2 = self.packed_items[j]
+
+                touch_x = approximately_equal(
+                    it1.x + it1.packed_length, it2.x
+                ) or approximately_equal(it2.x + it2.packed_length, it1.x)
+                touch_y = approximately_equal(
+                    it1.y + it1.packed_width, it2.y
+                ) or approximately_equal(it2.y + it2.packed_width, it1.y)
+                touch_z = approximately_equal(
+                    it1.z + it1.packed_height, it2.z
+                ) or approximately_equal(it2.z + it2.packed_height, it1.z)
+
+                overlap_x = (
+                    custom_min(it1.x + it1.packed_length, it2.x + it2.packed_length)
+                    - custom_max(it1.x, it2.x)
+                ) > 0.001
+                overlap_y = (
+                    custom_min(it1.y + it1.packed_width, it2.y + it2.packed_width)
+                    - custom_max(it1.y, it2.y)
+                ) > 0.001
+                overlap_z = (
+                    custom_min(it1.z + it1.packed_height, it2.z + it2.packed_height)
+                    - custom_max(it1.z, it2.z)
+                ) > 0.001
+
+                if (
+                    (touch_x and overlap_y and overlap_z)
+                    or (touch_y and overlap_x and overlap_z)
+                    or (touch_z and overlap_x and overlap_y)
+                ):
+                    graph.add_edge(it1.id, it2.id)
+
+        return graph
+
+    def analyze_structural_stability_dfs(self) -> Dict[str, Any]:
+        """Perform DFS-based structural analysis on physical stacking dependencies.
+
+        Applies:
+        - DFS Cycle Detection to verify physical DAG integrity (no circular loops).
+        - DFS Topological Sort for legal, hazard-free unstacking sequence.
+        - DFS Subtree Accumulation for cumulative downward compressive loads.
+        """
+        support_graph = self.build_support_graph()
+        has_cycle = dfs_has_cycle(support_graph)
+        unstacking_order = dfs_topological_sort(support_graph)
+
+        item_weights = {it.id: it.weight for it in self.packed_items}
+        ground_items = [
+            it.id for it in self.packed_items if approximately_equal(it.z, 0.0)
+        ]
+        cumulative_loads = dfs_cumulative_subtree_load(
+            support_graph, ground_items, item_weights
+        )
+
+        return {
+            "is_physically_stable_dag": not has_cycle,
+            "unstacking_sequence": unstacking_order,
+            "cumulative_downward_loads": cumulative_loads,
+        }
+
+    def analyze_logistics_accessibility_bfs(self) -> Dict[str, Any]:
+        """Perform BFS-based analysis on warehouse accessibility and cargo clustering.
+
+        Applies:
+        - BFS Connected Components to identify contiguous clusters of touching cargo.
+        - Multi-Source BFS to compute extraction layers (distance hops from container opening).
+        """
+        adj_graph = self.build_spatial_adjacency_graph()
+        cargo_clusters = bfs_connected_components(adj_graph)
+
+        if not self.packed_items:
+            return {"cargo_clusters": [], "accessibility_layers": {}}
+
+        # Items situated near the container door / front boundary
+        front_threshold = self.width * 0.70
+        entrance_items = [
+            it.id
+            for it in self.packed_items
+            if (it.y + it.packed_width) >= front_threshold
+        ]
+        if not entrance_items:
+            entrance_items = [self.packed_items[0].id]
+
+        accessibility_layers = bfs_accessibility_hops(adj_graph, entrance_items)
+
+        return {
+            "cargo_clusters": cargo_clusters,
+            "accessibility_layers": accessibility_layers,
+        }
+
 

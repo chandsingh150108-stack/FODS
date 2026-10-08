@@ -346,6 +346,8 @@ def run_packing():
                 "used_volume": round(c.used_volume, 2),
                 "utilization": round(c.utilization_percentage, 2),
                 "items": placed_items,
+                "dfs_stability": c.analyze_structural_stability_dfs(),
+                "bfs_accessibility": c.analyze_logistics_accessibility_bfs(),
             }
         )
 
