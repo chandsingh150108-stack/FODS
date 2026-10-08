@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Bin Packing Studio — Logistics & Warehouse Optimization</title>
+  
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Three.js, OrbitControls and TWEEN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- Application Header / Navigation -->
+    <header id="navbar">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">3D Bin Packing Studio</span>
+          <span class="brand-version">v2.4</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Preset Scenario Selectors -->
+        <div class="nav-presets" role="group" aria-label="Preset Scenarios">
+          <span class="nav-presets-label">Presets:</span>
+          <button class="btn btn-secondary btn-sm preset-item" data-condition="1">1: Basic</button>
+          <button class="btn btn-secondary btn-sm preset-item" data-condition="2">2: Fragile</button>
+          <button class="btn btn-secondary btn-sm preset-item" data-condition="3">3: Multi-Bin</button>
+          <button class="btn btn-secondary btn-sm preset-item" data-condition="4">4: Batch</button>
+        </div>
+
+        <div class="nav-divider"></div>
+
+        <!-- Auth Controls -->
+        <button id="btn-nav-auth" class="btn btn-primary btn-sm">Log In</button>
+        <div id="user-badge" class="user-badge" style="display: none;">
+          <span class="user-status-dot"></span>
+          <span class="user-label">User: <strong id="nav-username">User</strong></span>
+          <button id="btn-logout" class="btn btn-secondary btn-sm">Sign Out</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace Area -->
+    <main id="workspace">
+      <!-- Left Sidebar: Inventory & Configuration -->
+      <aside id="sidebar">
+        <!-- Sidebar Navigation Tabs -->
+        <div class="sidebar-tabs" role="tablist">
+          <button id="tab-btn-objects" class="sidebar-tab active" role="tab" aria-selected="true">
+            Objects <span class="tab-badge" id="badge-objects-count">0</span>
+          </button>
+          <button id="tab-btn-containers" class="sidebar-tab" role="tab" aria-selected="false">
+            Containers <span class="tab-badge" id="badge-containers-count">0</span>
+          </button>
+        </div>
+
+        <!-- Objects Inventory Panel -->
+        <div id="tab-content-objects" class="sidebar-panel">
+          <div class="panel-toolbar">
+            <div class="selection-btn-group">
+              <button id="btn-select-all-objects" class="btn btn-subtle btn-xs">Select All</button>
+              <button id="btn-deselect-all-objects" class="btn btn-subtle btn-xs">Deselect</button>
+            </div>
+            <button id="btn-open-add-object" class="btn btn-secondary btn-xs">+ Add Object</button>
+          </div>
+          <div id="objects-list" class="inventory-list"></div>
+        </div>
+
+        <!-- Containers Inventory Panel -->
+        <div id="tab-content-containers" class="sidebar-panel" style="display: none;">
+          <div class="panel-toolbar panel-toolbar-end">
+            <button id="btn-open-add-container" class="btn btn-secondary btn-xs">+ Add Container</button>
+          </div>
+          <div id="containers-list" class="inventory-list"></div>
+        </div>
+
+        <!-- Notice Banner for Unpacked Items -->
+        <div id="unpacked-notice" class="unpacked-notice" style="display: none;"></div>
+
+        <!-- Action Footer -->
+        <div class="sidebar-footer">
+          <div class="selection-summary">
+            <span class="summary-label">Selected For Packing</span>
+            <span id="selection-summary-text" class="summary-value">0 Objects | 0 Containers</span>
+          </div>
+          <button id="btn-run-pack" class="btn btn-primary btn-block">
+            Pack & Calculate 3D
+          </button>
+        </div>
+      </aside>
+
+      <!-- Right Section: 3D Viewport Workspace -->
+      <section id="viewport-container">
+        <div id="canvas-3d"></div>
+
+        <!-- Overlay Top: Container Navigation Tabs -->
+        <div class="viewport-overlay-top">
+          <div class="container-tabs-wrapper" id="viewport-container-tabs"></div>
+        </div>
+
+        <!-- Overlay Left: Technical Metrics Card -->
+        <div id="metrics-hud" class="viewport-card metrics-card">
+          <div class="metrics-header">CONTAINER METRICS</div>
+          
+          <div class="metric-row">
+            <span class="metric-label">Dimensions</span>
+            <span class="metric-val" id="metric-dim">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Items Placed</span>
+            <span class="metric-val" id="metric-items">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Weight Load</span>
+            <span class="metric-val" id="metric-weight">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Space Utilization</span>
+            <span class="metric-val" id="metric-util">--%</span>
+          </div>
+          
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Overlay Bottom: Viewport Tools -->
+        <div id="viewport-controls-bottom" class="viewport-card controls-toolbar">
+          <div class="slider-group">
+            <label for="explode-slider" class="control-label">Exploded View</label>
+            <input type="range" id="explode-slider" min="0" max="1" step="0.01" value="0">
+          </div>
+          <div class="toolbar-divider"></div>
+          <button class="btn btn-secondary btn-sm" id="btn-reset-cam">Reset View</button>
+          <button class="btn btn-secondary btn-sm" id="btn-play-anim">Play Sequence</button>
+        </div>
+
+        <!-- Overlay Right: Classification Legend -->
+        <div id="viewport-legend" class="viewport-card legend-card">
+          <div class="legend-header">CLASSIFICATION</div>
+          <div class="legend-item"><span class="legend-dot dot-fragile"></span> Fragile Object</div>
+          <div class="legend-item"><span class="legend-dot dot-heavy"></span> Heavy (&ge; 20 kg)</div>
+          <div class="legend-item"><span class="legend-dot dot-cylinder"></span> Cylinder</div>
+          <div class="legend-item"><span class="legend-dot dot-sphere"></span> Sphere</div>
+          <div class="legend-item"><span class="legend-dot dot-wedge"></span> Wedge / Ramp</div>
+          <div class="legend-item"><span class="legend-dot dot-pyramid"></span> Pyramid</div>
+          <div class="legend-item"><span class="legend-dot dot-capsule"></span> Capsule</div>
+          <div class="legend-item"><span class="legend-dot dot-hexagonal"></span> Hex Prism</div>
+          <div class="legend-item"><span class="legend-dot dot-torus"></span> Torus / Spool</div>
+          <div class="legend-item"><span class="legend-dot dot-flat"></span> Flat Package</div>
+          <div class="legend-item"><span class="legend-dot dot-standard"></span> Cuboid / Box</div>
+        </div>
+
+        <!-- 3D Raycast Hover Tooltip Card -->
+        <div id="hover-tooltip" class="viewport-card tooltip-card">
+          <div class="tooltip-title" id="tt-name">Item Name</div>
+          <div class="tooltip-body">
+            <div class="tooltip-row"><span class="tt-label">Position</span><span class="tt-val" id="tt-pos">--</span></div>
+            <div class="tooltip-row"><span class="tt-label">Dimensions</span><span class="tt-val" id="tt-size">--</span></div>
+            <div class="tooltip-row"><span class="tt-label">Weight</span><span class="tt-val" id="tt-weight">--</span></div>
+            <div class="tooltip-row"><span class="tt-label">Volume</span><span class="tt-val" id="tt-vol">--</span></div>
+          </div>
+          <div class="card-tags" id="tt-badges"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal: Authentication (Login / Register) -->
+  <div id="auth-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="auth-modal-title">Sign In</h2>
+        <button id="btn-close-auth-modal" class="btn-close" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="auth-form" class="modal-form">
+        <div class="form-group">
+          <label for="auth-username">Username</label>
+          <input type="text" id="auth-username" class="form-input" placeholder="Enter username" autocomplete="username" required>
+        </div>
+        <div class="form-group">
+          <label for="auth-password">Password</label>
+          <input type="password" id="auth-password" class="form-input" placeholder="Enter password" autocomplete="current-password" required>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" id="btn-auth-submit" class="btn btn-primary btn-block">Sign In</button>
+          <button type="button" id="btn-switch-auth" class="btn-text">Don't have an account? Register</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Custom Object -->
+  <div id="add-object-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">Create Object</h2>
+        <button id="btn-close-add-object" class="btn-close" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="add-object-form" class="modal-form">
+        <div class="form-group">
+          <label for="obj-name">Item Name</label>
+          <input type="text" id="obj-name" class="form-input" placeholder="e.g. Electric Motor" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="obj-shape">Geometry</label>
+            <select id="obj-shape" class="form-select">
+              <option value="cuboid" selected>Cuboid (Standard Box)</option>
+              <option value="cube">Cube (Equal Sides)</option>
+              <option value="cylinder">Cylinder / Drum</option>
+              <option value="sphere">Sphere / Ball</option>
+              <option value="wedge">Wedge / Ramp</option>
+              <option value="pyramid">Pyramid</option>
+              <option value="capsule">Capsule / Canister</option>
+              <option value="hexagonal_prism">Hexagonal Prism</option>
+              <option value="torus">Torus / Spool</option>
+              <option value="flat">Flat Package</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="obj-weight">Weight (kg)</label>
+            <input type="number" step="0.1" min="0.1" id="obj-weight" class="form-input" value="15.0" required>
+          </div>
+        </div>
+
+        <!-- Dynamic Shape Dimensions -->
+        <div id="dimensions-container">
+          <!-- Dynamically populated based on chosen geometry -->
+        </div>
+        <div class="form-checkboxes">
+          <label class="checkbox-label">
+            <input type="checkbox" id="obj-fragile" class="custom-checkbox">
+            <span>Fragile (cannot support top load)</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="obj-stackable" class="custom-checkbox" checked>
+            <span>Stackable (can support other items)</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="obj-rotatable" class="custom-checkbox" checked>
+            <span>Rotatable in 3D</span>
+          </label>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Save Object</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Custom Container -->
+  <div id="add-container-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">Create Container</h2>
+        <button id="btn-close-add-container" class="btn-close" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="add-container-form" class="modal-form">
+        <div class="form-group">
+          <label for="c-name">Container Name</label>
+          <input type="text" id="c-name" class="form-input" placeholder="e.g. Warehouse Bay 1" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="c-length">Length (m)</label>
+            <input type="number" step="0.1" min="0.1" id="c-length" class="form-input" value="12.0" required>
+          </div>
+          <div class="form-group">
+            <label for="c-width">Width (m)</label>
+            <input type="number" step="0.1" min="0.1" id="c-width" class="form-input" value="10.0" required>
+          </div>
+          <div class="form-group">
+            <label for="c-height">Height (m)</label>
+            <input type="number" step="0.1" min="0.1" id="c-height" class="form-input" value="10.0" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="c-max-weight">Max Capacity (kg)</label>
+          <input type="number" step="0.1" min="0.1" id="c-max-weight" class="form-input" value="150.0" required>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Save Container</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/visualizer3d.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

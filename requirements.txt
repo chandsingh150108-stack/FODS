@@ -1,0 +1,10 @@
+# ==============================================================================
+# 3D Bin Packing Studio — Project Dependencies
+# ==============================================================================
+
+# Core Web Application & REST API
+flask>=3.0.0
+
+# Database Connectivity (MySQL Support; SQLite is built-in standard library)
+pymysql>=1.1.0
+cryptography>=41.0.0
