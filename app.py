@@ -16,6 +16,7 @@ from typing import Any, Dict, List
 from flask import Flask, jsonify, request, send_from_directory, session
 
 from database import db
+from dsa import custom_sum
 from models import Container, Item
 from packer import PackingEngine
 from scenarios import ScenarioRepository
@@ -361,9 +362,9 @@ def run_packing():
         if not it.packed
     ]
 
-    total_packed = sum(len(c.packed_items) for c in containers)
+    total_packed = custom_sum(len(c.packed_items) for c in containers)
     avg_util = (
-        sum(c.utilization_percentage for c in containers) / len(containers)
+        custom_sum(c.utilization_percentage for c in containers) / len(containers)
         if containers
         else 0.0
     )
@@ -377,7 +378,7 @@ def run_packing():
                 "total_items": len(items),
                 "packed_count": total_packed,
                 "unpacked_count": len(unpacked_list),
-                "containers_used": sum(1 for c in containers if len(c.packed_items) > 0),
+                "containers_used": custom_sum(1 for c in containers if len(c.packed_items) > 0),
                 "average_utilization": round(avg_util, 2),
             },
         }

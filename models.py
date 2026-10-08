@@ -12,6 +12,8 @@ import math
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+from dsa import custom_any, custom_max, custom_min
+
 
 def approximately_equal(a: float, b: float, tolerance: float = 0.001) -> bool:
     """Check whether two floating point numbers are equal within a small tolerance."""
@@ -106,7 +108,9 @@ class Item:
 
     def calculate_volume(self) -> float:
         """Calculate item volume based on geometric shape."""
-        l, w, h = max(0.001, self.length), max(0.001, self.width), max(0.001, self.height)
+        l = custom_max(0.001, self.length)
+        w = custom_max(0.001, self.width)
+        h = custom_max(0.001, self.height)
         s = (self.shape or "cuboid").lower().strip()
 
         if s == "cylinder":
@@ -126,15 +130,15 @@ class Item:
             return (3.0 * math.sqrt(3.0) / 8.0) * l * w * h
         elif s == "capsule":
             # Cylinder with 2 hemispherical end caps
-            r_cap = min(l, w, h) / 2.0
-            cyl_h = max(0.0, h - 2.0 * r_cap)
+            r_cap = custom_min(l, w, h) / 2.0
+            cyl_h = custom_max(0.0, h - 2.0 * r_cap)
             cyl_vol = math.pi * (l / 2.0) * (w / 2.0) * cyl_h
             sph_vol = (4.0 / 3.0) * math.pi * (r_cap ** 3)
             return cyl_vol + sph_vol
         elif s == "torus":
             # Torus with major radius R and tube radius r
             r_tube = h / 2.0
-            r_major = max(0.001, (min(l, w) / 2.0) - r_tube)
+            r_major = custom_max(0.001, (custom_min(l, w) / 2.0) - r_tube)
             return 2.0 * (math.pi ** 2) * r_major * (r_tube ** 2)
         # Default for cuboid, cube, flat
         return l * w * h
@@ -155,7 +159,7 @@ class Item:
 
         unique_orientations: List[Orientation] = []
         for l, w, h in possible:
-            if not any(o.matches(l, w, h) for o in unique_orientations):
+            if not custom_any(o.matches(l, w, h) for o in unique_orientations):
                 unique_orientations.append(Orientation(l, w, h))
 
         return unique_orientations
@@ -282,13 +286,13 @@ class Container:
                 continue
 
             # Calculate 2D contact footprint in XY plane
-            overlap_x = max(
+            overlap_x = custom_max(
                 0.0,
-                min(x + length, support.x + support.packed_length) - max(x, support.x),
+                custom_min(x + length, support.x + support.packed_length) - custom_max(x, support.x),
             )
-            overlap_y = max(
+            overlap_y = custom_max(
                 0.0,
-                min(y + width, support.y + support.packed_width) - max(y, support.y),
+                custom_min(y + width, support.y + support.packed_width) - custom_max(y, support.y),
             )
 
             overlap_area = overlap_x * overlap_y

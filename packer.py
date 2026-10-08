@@ -12,6 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
+from dsa import custom_sort
 from models import Container, Item, approximately_equal
 
 
@@ -131,8 +132,13 @@ class PackingEngine:
         self.candidate_generator = CandidatePositionGenerator()
         self.comparator = PositionComparator()
 
+    @staticmethod
+    def custom_sort(arr: list, key=None, reverse: bool = False) -> list:
+        """Explicit from-scratch sorting routine avoiding in-built Python .sort() / sorted()."""
+        return custom_sort(arr, key=key, reverse=reverse)
+
     def sort_items(self, items: List[Item]) -> None:
-        """Sort items in-place using Selection Sort.
+        """Sort items in-place using an explicit Selection Sort algorithm (no built-in .sort()).
 
         Priority:
         1. Volume (descending - largest objects packed first)
@@ -153,6 +159,8 @@ class PackingEngine:
 
             if best_position != i:
                 items[i], items[best_position] = items[best_position], items[i]
+
+    custom_sort_items = sort_items
 
     def find_best_position(self, container: Container, item: Item) -> Optional[Placement]:
         """Find the optimal legal placement for an item in a given container."""
