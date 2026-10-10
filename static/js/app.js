@@ -433,22 +433,6 @@ class App {
     }
   }
 
-  async loadPreset(conditionNum) {
-    try {
-      const res = await fetch('/api/presets/load', {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ condition: conditionNum }),
-      });
-      if (res.ok) {
-        await this.loadInventory();
-        this.runPacking();
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
   // -------------------------------------------------------------
   // Packing Simulation
   // -------------------------------------------------------------
@@ -537,12 +521,6 @@ class App {
     document.getElementById('btn-select-all-objects').onclick = () => this.selectAllObjects(true);
     document.getElementById('btn-deselect-all-objects').onclick = () => this.selectAllObjects(false);
 
-    // Exploded View Slider
-    const explodeSlider = document.getElementById('explode-slider');
-    if (explodeSlider) {
-      explodeSlider.oninput = (e) => this.visualizer.setExplodeFactor(parseFloat(e.target.value));
-    }
-
     // Sequence Animation
     const animBtn = document.getElementById('btn-play-anim');
     if (animBtn) animBtn.onclick = () => this.visualizer.playSequenceAnimation();
@@ -550,14 +528,6 @@ class App {
     // Reset Camera
     const resetCamBtn = document.getElementById('btn-reset-cam');
     if (resetCamBtn) resetCamBtn.onclick = () => this.visualizer.resetCamera();
-
-    // Presets Dropdown
-    document.querySelectorAll('.preset-item').forEach(item => {
-      item.onclick = (e) => {
-        const cond = parseInt(e.target.getAttribute('data-condition'));
-        this.loadPreset(cond);
-      };
-    });
 
     // Auth Modal
     document.getElementById('btn-nav-auth').onclick = () => this.showAuthModal(true);

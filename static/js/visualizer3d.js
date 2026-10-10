@@ -361,9 +361,6 @@ class Visualizer3D {
   playSequenceAnimation() {
     if (!window.TWEEN || this.itemMeshes.length === 0) return;
 
-    const explodeSlider = document.getElementById('explode-slider');
-    if (explodeSlider) explodeSlider.value = 0;
-
     const cData = this.containersData[this.currentContainerIndex];
     const topDropHeight = cData ? cData.height + 4 : 12;
 
@@ -386,8 +383,25 @@ class Visualizer3D {
     this.mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
     if (this.tooltipEl) {
-      this.tooltipEl.style.left = `${e.clientX}px`;
-      this.tooltipEl.style.top = `${e.clientY}px`;
+      // Position relative to viewport container, right beside cursor/object
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const tipWidth = this.tooltipEl.offsetWidth || 210;
+      const tipHeight = this.tooltipEl.offsetHeight || 150;
+
+      let left = x + 10;
+      let top = y + 10;
+
+      // Keep tooltip visible without clipping viewport borders
+      if (left + tipWidth > rect.width - 12) {
+        left = x - tipWidth - 10;
+      }
+      if (top + tipHeight > rect.height - 12) {
+        top = y - tipHeight - 10;
+      }
+
+      this.tooltipEl.style.left = `${Math.max(6, left)}px`;
+      this.tooltipEl.style.top = `${Math.max(6, top)}px`;
     }
 
     this.raycaster.setFromCamera(this.mouse, this.camera);

@@ -19,7 +19,6 @@ from database import db
 from dsa import custom_sum
 from models import Container, Item
 from packer import PackingEngine
-from scenarios import ScenarioRepository
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 app.secret_key = os.environ.get("SECRET_KEY", "bin-packing-secret-key-3d-fods-larp-2026")
@@ -212,36 +211,6 @@ def delete_container(c_id: int):
         return jsonify({"error": "Unauthorized"}), 401
     success = db.delete_container(uid, c_id)
     return jsonify({"success": success})
-
-
-# -------------------------------------------------------------
-# Reset / Load Presets API
-# -------------------------------------------------------------
-@app.route("/api/presets/load", methods=["POST"])
-def load_preset():
-    uid = get_current_user_id()
-    if not uid:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    data = request.get_json() or {}
-    condition_num = int(data.get("condition", 1))
-
-    if condition_num == 1:
-        scenario = ScenarioRepository.get_test_condition_one()
-    elif condition_num == 2:
-        scenario = ScenarioRepository.get_test_condition_two()
-    elif condition_num == 3:
-        scenario = ScenarioRepository.get_test_condition_three()
-    else:
-        scenario = ScenarioRepository.get_test_condition_four()
-
-    # Save to user inventory
-    for c in scenario.containers:
-        db.create_container(uid, f"Preset {c.id} ({c.length}x{c.width}x{c.height})", c.length, c.width, c.height, c.maximum_weight)
-    for it in scenario.items:
-        db.create_object(uid, it.name, it.length, it.width, it.height, it.weight, it.shape, it.fragile, it.stackable, it.rotatable)
-
-    return jsonify({"success": True, "message": f"Loaded {scenario.name}"})
 
 
 # -------------------------------------------------------------

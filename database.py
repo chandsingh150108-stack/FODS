@@ -264,24 +264,21 @@ class DatabaseManager:
     def seed_user_defaults(self, user_id: int) -> None:
         """Seed initial factory objects and containers for new users."""
         default_containers = [
-            ("Standard Warehouse Bin (C1)", 12.0, 10.0, 10.0, 150.0),
-            ("Compact Bin (C2)", 8.0, 8.0, 8.0, 80.0),
-            ("Tall Storage Bin (C3)", 10.0, 10.0, 12.0, 140.0),
+            ("Standard Warehouse Bay (12x10x10m)", 12.0, 10.0, 10.0, 200.0),
+            ("Compact Bay (8x8x8m)", 8.0, 8.0, 8.0, 100.0),
         ]
         default_items = [
-            ("Industrial Motor", 5.0, 4.0, 3.0, 20.0, "cuboid", False, True, True),
-            ("Metal Pump", 4.0, 4.0, 3.0, 18.0, "cuboid", False, True, True),
-            ("Steel Housing", 4.0, 4.0, 4.0, 25.0, "cube", False, True, True),
-            ("Control Box", 4.0, 3.0, 2.0, 10.0, "cuboid", True, False, True),
-            ("Pressure Cylinder", 3.0, 3.0, 5.0, 15.0, "cylinder", False, True, True),
+            ("Industrial Motor (Cuboid)", 5.0, 4.0, 3.0, 20.0, "cuboid", False, True, True),
+            ("Steel Housing (Cube)", 3.0, 3.0, 3.0, 18.0, "cube", False, True, True),
+            ("Pressure Cylinder", 3.0, 3.0, 4.0, 15.0, "cylinder", False, True, True),
             ("Storage Sphere", 3.0, 3.0, 3.0, 12.0, "sphere", False, False, True),
-            ("Ramp Wedge", 4.0, 3.0, 2.0, 14.0, "wedge", False, True, True),
+            ("Loading Ramp (Wedge)", 4.0, 3.0, 2.0, 14.0, "wedge", False, True, True),
             ("Structural Pyramid", 3.0, 3.0, 3.0, 11.0, "pyramid", False, False, True),
-            ("Hexagonal Drum", 3.0, 3.0, 4.0, 16.0, "hexagonal_prism", False, True, True),
-            ("Gas Capsule Canister", 2.0, 2.0, 4.0, 10.0, "capsule", False, False, True),
-            ("Cable Spool Torus", 4.0, 4.0, 2.0, 13.0, "torus", False, True, True),
-            ("Sensor Package", 3.0, 2.0, 2.0, 5.0, "flat", True, False, True),
-            ("Bearing Box", 3.0, 3.0, 2.0, 8.0, "cuboid", False, True, True),
+            ("Hexagonal Drum (Hex Prism)", 3.0, 3.0, 4.0, 16.0, "hexagonal_prism", False, True, True),
+            ("Gas Canister (Capsule)", 2.0, 2.0, 4.0, 10.0, "capsule", False, False, True),
+            ("Cable Spool (Torus)", 4.0, 4.0, 2.0, 13.0, "torus", False, True, True),
+            ("Insulated Panel (Flat)", 4.0, 3.0, 0.5, 8.0, "flat", False, True, True),
+            ("Precision Control Box", 4.0, 3.0, 2.0, 10.0, "cuboid", True, False, True),
         ]
 
         for name, l, w, h, mw in default_containers:
