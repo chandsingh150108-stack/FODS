@@ -262,23 +262,22 @@ class DatabaseManager:
             return None
 
     def seed_user_defaults(self, user_id: int) -> None:
-        """Seed initial factory objects and containers for new users."""
+        """Seed basic placeholder objects (one per shape) and containers for new users."""
         default_containers = [
-            ("Standard Warehouse Bay (12x10x10m)", 12.0, 10.0, 10.0, 200.0),
-            ("Compact Bay (8x8x8m)", 8.0, 8.0, 8.0, 100.0),
+            ("Standard Bin (12x10x10)", 12.0, 10.0, 10.0, 150.0),
+            ("Compact Bin (8x8x8)", 8.0, 8.0, 8.0, 80.0),
         ]
         default_items = [
-            ("Industrial Motor (Cuboid)", 5.0, 4.0, 3.0, 20.0, "cuboid", False, True, True),
-            ("Steel Housing (Cube)", 3.0, 3.0, 3.0, 18.0, "cube", False, True, True),
-            ("Pressure Cylinder", 3.0, 3.0, 4.0, 15.0, "cylinder", False, True, True),
-            ("Storage Sphere", 3.0, 3.0, 3.0, 12.0, "sphere", False, False, True),
-            ("Loading Ramp (Wedge)", 4.0, 3.0, 2.0, 14.0, "wedge", False, True, True),
-            ("Structural Pyramid", 3.0, 3.0, 3.0, 11.0, "pyramid", False, False, True),
-            ("Hexagonal Drum (Hex Prism)", 3.0, 3.0, 4.0, 16.0, "hexagonal_prism", False, True, True),
-            ("Gas Canister (Capsule)", 2.0, 2.0, 4.0, 10.0, "capsule", False, False, True),
-            ("Cable Spool (Torus)", 4.0, 4.0, 2.0, 13.0, "torus", False, True, True),
-            ("Insulated Panel (Flat)", 4.0, 3.0, 0.5, 8.0, "flat", False, True, True),
-            ("Precision Control Box", 4.0, 3.0, 2.0, 10.0, "cuboid", True, False, True),
+            ("Sample Cuboid", 4.0, 3.0, 2.0, 10.0, "cuboid", False, True, True),
+            ("Sample Cube", 3.0, 3.0, 3.0, 12.0, "cube", False, True, True),
+            ("Sample Cylinder", 3.0, 3.0, 4.0, 15.0, "cylinder", False, True, True),
+            ("Sample Sphere", 3.0, 3.0, 3.0, 8.0, "sphere", False, False, True),
+            ("Sample Wedge", 4.0, 3.0, 2.0, 14.0, "wedge", False, True, True),
+            ("Sample Pyramid", 3.0, 3.0, 3.0, 11.0, "pyramid", False, False, True),
+            ("Sample Capsule", 2.0, 2.0, 4.0, 10.0, "capsule", False, False, True),
+            ("Sample Hex Prism", 3.0, 3.0, 4.0, 16.0, "hexagonal_prism", False, True, True),
+            ("Sample Spool (Torus)", 4.0, 4.0, 2.0, 13.0, "torus", False, True, True),
+            ("Sample Flat Panel", 4.0, 3.0, 0.5, 5.0, "flat", False, True, True),
         ]
 
         for name, l, w, h, mw in default_containers:

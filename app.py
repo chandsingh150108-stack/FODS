@@ -5,7 +5,6 @@ Endpoints:
 - Objects / Items Inventory CRUD
 - Containers Inventory CRUD
 - Simulation Runner (/api/pack) linking domain models & PackingEngine
-- Static UI Serving (Pure HTML/CSS/JS frontend)
 """
 
 from __future__ import annotations

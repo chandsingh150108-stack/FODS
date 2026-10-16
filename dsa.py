@@ -42,7 +42,7 @@ T = TypeVar("T")
 # ==============================================================================
 
 class Stack:
-    """Explicit LIFO (Last-In-First-Out) Stack implementation written from scratch."""
+    """Explicit LIFO (Last-In-First-Out) Stack implementation."""
 
     def __init__(self) -> None:
         self._items: List[Any] = []
@@ -73,10 +73,7 @@ class Stack:
 
 
 class Queue:
-    """Explicit FIFO (First-In-First-Out) Queue implementation written from scratch.
-    
-    Uses an internal head-index pointer to achieve O(1) amortized dequeues without
-    relying on collections.deque or external modules.
+    """Explicit FIFO (First-In-First-Out) Queue implementation.
     """
 
     def __init__(self) -> None:

@@ -3,7 +3,6 @@
 Contains the algorithmic strategies:
 - In-place Selection Sort (Volume descending, Weight descending tie-breaker)
 - Extreme Point / Corner Candidate Position Generation
-- Lexicographical Position Comparison (Lower Z, Smaller Y, Smaller X, Lower Height)
 - Greedy Best-Fit Multi-Container Allocation
 """
 

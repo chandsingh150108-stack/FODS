@@ -481,12 +481,20 @@ class App {
     }
   }
 
+  dismissUnpackedNotice() {
+    const noticeEl = document.getElementById('unpacked-notice');
+    if (noticeEl) noticeEl.style.display = 'none';
+  }
+
   renderUnpackedNotice(unpacked, summary) {
     const noticeEl = document.getElementById('unpacked-notice');
     if (!noticeEl) return;
     if (unpacked && unpacked.length > 0) {
       noticeEl.innerHTML = `
-        <div style="font-weight: 600; margin-bottom: 4px;">Notice: ${unpacked.length} item(s) could not fit</div>
+        <div class="unpacked-notice-header">
+          <div style="font-weight: 600;">Notice: ${unpacked.length} item(s) could not fit</div>
+          <button class="unpacked-close" title="Dismiss" aria-label="Dismiss notice" onclick="window.app.dismissUnpackedNotice()">✕</button>
+        </div>
         ${unpacked.map(u => `<div>• <b>${u.name}</b> (${u.dimensions}): ${u.reason}</div>`).join('')}
       `;
       noticeEl.style.display = 'block';
@@ -520,6 +528,12 @@ class App {
     // Select All / Deselect All
     document.getElementById('btn-select-all-objects').onclick = () => this.selectAllObjects(true);
     document.getElementById('btn-deselect-all-objects').onclick = () => this.selectAllObjects(false);
+
+    // Exploded View Slider
+    const explodeSlider = document.getElementById('explode-slider');
+    if (explodeSlider) {
+      explodeSlider.oninput = (e) => this.visualizer.setExplodeFactor(parseFloat(e.target.value));
+    }
 
     // Sequence Animation
     const animBtn = document.getElementById('btn-play-anim');

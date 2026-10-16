@@ -166,17 +166,22 @@ class Visualizer3D {
         const ry = Math.min(rx, rz, h / 2);
         const cylH = Math.max(0.01, h - 2 * ry);
         const points = [];
-        const segs = 10;
-        for (let i = segs; i >= 0; i--) {
-          const a = (Math.PI / 2) + (i / segs) * (Math.PI / 2);
-          points.push(new THREE.Vector2(Math.sin(a) * 1.0, -cylH / 2 - Math.cos(a) * ry));
-        }
+        const segs = 12;
+        // Bottom hemisphere: pole (-cylH/2 - ry) -> equator (-cylH/2)
         for (let i = 0; i <= segs; i++) {
-          const a = (i / segs) * (Math.PI / 2);
-          points.push(new THREE.Vector2(Math.cos(a) * 1.0, cylH / 2 + Math.sin(a) * ry));
+          const phi = -Math.PI / 2 + (i / segs) * (Math.PI / 2);
+          const r = Math.max(0, Math.cos(phi));
+          points.push(new THREE.Vector2(r, -cylH / 2 + Math.sin(phi) * ry));
+        }
+        // Top hemisphere: equator (+cylH/2) -> pole (+cylH/2 + ry)
+        for (let i = 1; i <= segs; i++) {
+          const phi = (i / segs) * (Math.PI / 2);
+          const r = Math.max(0, Math.cos(phi));
+          points.push(new THREE.Vector2(r, cylH / 2 + Math.sin(phi) * ry));
         }
         geom = new THREE.LatheGeometry(points, 24);
         geom.scale(rx, 1, rz);
+        geom.center();
         break;
       }
       case 'torus': {
@@ -361,6 +366,9 @@ class Visualizer3D {
   playSequenceAnimation() {
     if (!window.TWEEN || this.itemMeshes.length === 0) return;
 
+    const explodeSlider = document.getElementById('explode-slider');
+    if (explodeSlider) explodeSlider.value = 0;
+
     const cData = this.containersData[this.currentContainerIndex];
     const topDropHeight = cData ? cData.height + 4 : 12;
 
@@ -383,6 +391,8 @@ class Visualizer3D {
     this.mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
     if (this.tooltipEl) {
+      this.tooltipEl.style.left = `${e.clientX}px`;
+      this.tooltipEl.style.top = `${e.clientY}px`;
       // Position relative to viewport container, right beside cursor/object
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;

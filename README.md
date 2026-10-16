@@ -19,7 +19,6 @@ A constraint-based 3D bin packing engine and modern interactive WebGL studio for
    - Dynamic shape-aware dimension forms (Sphere asks for Diameter, Cube for Side Length, Torus for Major & Tube Radius, etc.).
    - Save and manage your custom **Containers** (name, dimensions, max weight capacity).
    - **Selective Packing**: Checkbox selection allowing you to pick specific objects for specific containers.
-   - Quick one-click benchmark preset buttons (Presets 1 to 4).
 
 3. **User Authentication & Database**:
    - Secure account registration & login with salted SHA-256 password hashing.
@@ -76,7 +75,6 @@ FODS Larp/
 ├── database.py             # Database manager (MySQL with SQLite fallback & user auth)
 ├── models.py               # Domain models (Item, Container, Orientation) & physics
 ├── packer.py               # Packing engine (Selection sort, candidate generator, Best-Fit)
-├── scenarios.py            # Benchmark test scenarios (Conditions 1-4)
 ├── requirements.txt        # Python package dependencies
 ├── FUT-TO-DO-CHANGES.MD    # Future constraints & dual-mode research
 ├── static/

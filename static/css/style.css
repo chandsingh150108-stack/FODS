@@ -150,21 +150,6 @@ html, body {
   gap: var(--space-8);
 }
 
-.nav-presets {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.nav-presets-label {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-right: var(--space-4);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 500;
-}
-
 .nav-divider {
   width: 1px;
   height: 20px;
@@ -518,6 +503,32 @@ html, body {
   border-radius: var(--radius-sm);
   font-size: 11px;
   color: #fca5a5;
+  position: relative;
+}
+
+.unpacked-notice-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.unpacked-close {
+  background: transparent;
+  border: none;
+  color: #fca5a5;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0.8;
+}
+
+.unpacked-close:hover {
+  opacity: 1;
+  background: rgba(220, 38, 38, 0.2);
 }
 
 /* ==========================================================================
@@ -857,6 +868,7 @@ input[type="range"]::-webkit-slider-thumb {
   border-color: var(--accent-primary);
   background-color: var(--surface-secondary);
   z-index: 100;
+  transform: translate(12px, 12px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
@@ -916,6 +928,8 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .modal-card {
+  width: 400px;
+  max-width: 90vw;
   width: 500px;
   max-width: 95vw;
   max-height: 90vh;
@@ -1009,6 +1023,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .form-row .form-group {
+  flex: 1;
   flex: 1 1 0;
   min-width: 0;
 }
